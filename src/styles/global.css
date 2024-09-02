@@ -1,6 +1,6 @@
 html {
   background-color: #f1f5f9;
-  font-family: sans-serif;
+  font-family: 'Zen Maru Gothic', sans-serif;
 }
 
 body {
@@ -9,6 +9,9 @@ body {
   max-width: 80ch;
   padding: 1rem;
   line-height: 1.5;
+
+
+
 }
 
 * {

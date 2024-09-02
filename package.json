@@ -12,6 +12,7 @@
   "dependencies": {
     "@astrojs/preact": "^3.5.2",
     "@astrojs/rss": "^4.0.7",
+    "@fontsource/zen-maru-gothic": "^5.0.20",
     "astro": "^4.15.1",
     "preact": "^10.23.2"
   }
