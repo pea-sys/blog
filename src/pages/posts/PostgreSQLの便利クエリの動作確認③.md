@@ -1,6 +1,6 @@
 ---
 layout: ../../layouts/MarkdownPostLayout.astro
-title: '2024-09-09 PostgreSQLの便利クエリの動作確認③'
+title: 'PostgreSQLの便利クエリの動作確認③'
 pubDate: 2024-09-09
 description: 'PostgreSQL'
 author: 'pea-sys'
