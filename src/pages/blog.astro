@@ -9,7 +9,13 @@ const pageTitle = "Blog";
   <ul>
     {
       allPosts.map((post) => (
-        <BlogPost url={post.url} title={post.frontmatter.title} />
+        <BlogPost
+          pubDate={new Date(post.frontmatter.pubDate).toLocaleDateString(
+            "ja-JP",
+          )}
+          url={post.url}
+          title={post.frontmatter.title}
+        />
       ))
     }
   </ul>
