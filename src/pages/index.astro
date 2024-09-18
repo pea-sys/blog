@@ -1,8 +1,60 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+const pageTitle = "私について";
+const identity = {
+  firstName: "Masami",
+  country: "日本",
+  occupation: "プロジェクトマネージャー",
+  hobbies: ["登山"],
+};
 
-const pageTitle = "Home Page";
-const tags = "astro";
+const skills = [
+  "C#",
+  "VB.NET",
+  "Python",
+  "PostgreSQL",
+  "MySQL",
+  "Clickhouse",
+  "HTML",
+  "CSS",
+  "JavaScript",
+];
+const happy = true;
+const finished = true;
+const goal = 3;
+const skillColor = "navy";
+const fontWeight = "bold";
 ---
 
-<BaseLayout pageTitle={pageTitle} />
+<BaseLayout pageTitle={pageTitle}>
+  <style define:vars={{ skillColor, fontWeight }}>
+    h1 {
+      color: purple;
+      font-size: 4rem;
+    }
+    .skill {
+      color: var(--skillColor);
+      font-weight: var(--fontWeight);
+      text-transform: var(--textCase);
+    }
+  </style>
+
+  <ul>
+    <li>
+      {identity.country}に住んでおり、{identity.occupation}として働いています。
+    </li>
+    <li>平日夜と土日に出来る副業先を探しています。</li>
+    <li>2009年からエンジニアとして1社で勤務しています。</li>
+    {
+      identity.hobbies.length >= 2 && (
+        <li>
+          私の2つの趣味は{identity.hobbies[0]}と{identity.hobbies[1]}です。
+        </li>
+      )
+    }
+  </ul>
+  <p>私のスキルは以下の通りです。</p>
+  <ul>
+    {skills.map((skill) => <li class="skill">{skill}</li>)}
+  </ul>
+</BaseLayout>
