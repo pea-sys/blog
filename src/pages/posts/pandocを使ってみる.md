@@ -28,14 +28,14 @@ PDFに変換するためには、PDFエンジンが別途必要なため、texli
 https://www.tug.org/texlive/acquire-netinstall.html
 
 ※私のPCではインストール開始から3時間以上たっても半分位しかが進んでていないのでいったん諦めました。  
-この時点で4GB位、ストレージを使用していました(デカイ)  
-PDFにする手段は他にも色々あるので、そちらに頼ることにします。
 
 ```
-・・・
 Installing [2188/4735, time/total: 03:44:52/08:41:12]: junicode [80728k]
 Installing [2189/4735, time/total: 03:45:37/08:21:59]: junicodevf [4496k]
 ```
+
+この時点で4GB位、ストレージを使用していました(デカイ)  
+PDFにする手段は他にも色々あるので、そちらに頼ることにします。
   
 
 ## 動作確認
@@ -54,8 +54,6 @@ html または html5 (HTML, すなわち HTML5 および XHTML polyglot markup)
 
 ipynb (Jupyter notebook)
 
-muse (Muse)
-
 pdf (PDF)
 
 plain (プレーンテキスト)
@@ -65,7 +63,7 @@ pptx (PowerPoint slide show)
 ```
 
 
-今回は、docx,html,PDFを確認します。
+今回は、docx,htmlを確認します。
 
 
 まずは、適当なマークダウンファイルを用意する。  
@@ -125,7 +123,7 @@ docxファイルの作成
 pandoc "C:\Users\masami\Desktop\sample.md" -t docx -o sample.docx
 ```
 
-<img src="https://images.prismic.io/peasysblog/ZuydR7VsGrYSvmoe_md2docx.png?auto=format,compress">
+<img src="https://images.prismic.io/peasysblog/ZuydR7VsGrYSvmoe_md2docx.png?auto=format,compress" width="800">
 
 htmlファイルを作成
 
@@ -133,13 +131,9 @@ htmlファイルを作成
 pandoc "C:\Users\masami\Desktop\sample.md" -t html -o sample.html --toc --highlight-style=zenburn
 ```
 
-<img src="https://images.prismic.io/peasysblog/ZuydPLVsGrYSvmod_md2html.png?auto=format,compress">
+<img src="https://images.prismic.io/peasysblog/ZuydPLVsGrYSvmod_md2html.png?auto=format,compress" width="800">
 
 ## 感想
 
-docxは思いのほか良い出来だと思いました。  
-画像のパス解決の方法がいまいち不明で、画像格納フォルダをカレントフォルダにすることで画像がうまいこと変換されるようになりました。
-※次のような警告が出て画像が文字列に置き換えられる
-```
-[WARNING] Could not fetch resource ./Logo.png: replacing image with description
-```
+docxは良い出来で積極的に使いたいと思いました。  
+画像のパス解決の方法が不明で、画像格納フォルダをカレントフォルダにすることで画像がうまいこと変換されるようになりました。
