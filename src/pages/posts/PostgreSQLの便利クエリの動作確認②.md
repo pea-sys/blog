@@ -3,7 +3,6 @@ layout: ../../layouts/MarkdownPostLayout.astro
 title: 'PostgreSQLの便利クエリの動作確認②'
 pubDate: 2024-09-08
 description: 'PostgreSQL'
-author: 'pea-sys'
 tags: ["PostgreSQL"]
 ---
 

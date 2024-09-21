@@ -3,7 +3,6 @@ layout: ../../layouts/MarkdownPostLayout.astro
 title: 'temboのDBインスタンスを壊す方法'
 pubDate: 2024-09-15
 description: 'PostgreSQL'
-author: 'pea-sys'
 tags: ["PostgreSQL","ManagedService"]
 ---
 

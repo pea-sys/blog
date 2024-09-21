@@ -3,7 +3,6 @@ layout: ../../layouts/MarkdownPostLayout.astro
 title: 'pandocを使ってみる'
 pubDate: 2024-09-19
 description: 'ツールの備忘録'
-author: 'pea-sys'
 tags: ["tool"]
 ---
 
