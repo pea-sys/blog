@@ -23,11 +23,13 @@ tags: ["tool"]
 https://github.com/jgm/pandoc/releases/
 
 
-PDFに変換するためには、PDFエンジンが別途必要なため、texliveもインストールします
+----
+~~PDFに変換するためには、PDFエンジンが別途必要なため、texliveもインストールします~~
 
-https://www.tug.org/texlive/acquire-netinstall.html
+~~https://www.tug.org/texlive/acquire-netinstall.html~~
 
-※私のPCではインストール開始から3時間以上たっても半分位しかが進んでていないのでいったん諦めました。  
+※texliveはインストール開始から3時間以上たっても半分位しか進んでていないので、pdf化は本手法では諦めました。  
+
 
 ```
 Installing [2188/4735, time/total: 03:44:52/08:41:12]: junicode [80728k]
@@ -37,6 +39,7 @@ Installing [2189/4735, time/total: 03:45:37/08:21:59]: junicodevf [4496k]
 この時点で4GB位、ストレージを使用していました(デカイ)  
 PDFにする手段は他にも色々あるので、そちらに頼ることにします。
   
+----
 
 ## 動作確認
 
