@@ -1,15 +1,15 @@
 ---
 layout: ../../layouts/MarkdownPostLayout.astro
-title: 'タイマーとDoEvents'
+title: 'フォームタイマーとDoEvents'
 pubDate: 2024-12-28
 description: ''
 tags: ["C#","VB.NET"]
 ---
 
-まず最初にDoEventsは使うなという意見は多数派であることは理解しており、私もそれには賛成の立場です。
-その前提でDoEventsを使っているシステムに関わる現場にいるため、問題点を記録しておきます。
+まず最初に「DoEventsは使うな」という意見は多数派であることを理解しており、私もそれには賛成の立場です。
+その前提でDoEventsを使っているシステムに関わる現場で働いているため、問題点を記録しておきます。
 
-timerとDoEventsが組み合わさることで発生する予期しない動作を
+UIスレッドで動くタイマーとDoEventsが組み合わさることで発生する予期しない動作を
 レガシーシステムで何度も目にしています。
 
 どういうことか、実際に例で動作確認してみます
@@ -65,15 +65,14 @@ End Class
 終了
 ```
 再入を考慮せず、グローバル変数を扱っていたり外部インターフェースと連携している場合に
-このような状況になると非常に怖いです。
+このような事象が発生すると非常に怖いです。
 
 ### 根本原因
 色々あると思いますが、DoEventsやWindowsメッセージキューに対する理解が浅いことだと思います。
 規模が大きいシステムで乱用していると、もはや制御不可能です。
 
 
-DoEventsの実装は次の通り  
-コメントにある通り、全てのWindowsメッセージキューを処理します
+DoEventsの実装は次のコメントにある通り、全てのWindowsメッセージキューを処理します
 
 ```c#
         /// <include file='doc\Application.uex' path='docs/doc[@for="Application.DoEvents"]/*' />
@@ -90,12 +89,12 @@ DoEventsの実装は次の通り
 ### 問題箇所の特定
 
 巨大なシステムだと、このような問題を見つけるのは
-中々大変なのでSpy++を使う。
-Spy++はVisualStudioInstallerでC++コア機能からインストールできる
+中々大変なのでSpy++を使います。
+Spy++はVisualStudioInstallerでC++コア機能からインストールできます。
 
 ![1](https://github.com/user-attachments/assets/2381659a-a330-4f03-9db2-5452f22becc1)
 
-インストール後はVisualStudioのツールにリンクが作成される。
+インストール後はVisualStudioのツールにリンクが作成されます。
 ただし、このツールは32bitプロセス用。  
 一見きちんと動くがメッセージがキャプチャされないのでハマりやすいです。
 ![2](https://github.com/user-attachments/assets/0d55246f-9802-4976-8800-d7befed583c4)
@@ -117,7 +116,7 @@ Spy++を起動したら次の作業を行います
 監視するメッセージの設定を行う  
 今回はWM_TIMERメッセージのみを拾う設定にする
 * メッセージタブからログオプションを選択する
-* すべてクリアを選択五、WM_TIMERを追加する
+* すべてクリアを選択後、WM_TIMERを追加する
 * ウィンドウタブに移動し、同じプロセスウィンドウにチェックを入れる
 * OKを押す
 
@@ -129,7 +128,28 @@ Spy++を起動したら次の作業を行います
 ![7](https://github.com/user-attachments/assets/03e046ef-6cb4-4644-94d3-b1d70953f32b)
 
 ### 対策方法
-
+* 再入を防ぐ。例えば、タイマー処理実行中フラグを用意したり、タイマー処理の入口でタイマーを止める、出口で動かす。この場合は、インターバルがタイマー処理終了後から起算となる。  
+  UIスレッドで動くタイマーのみ可能な対策。
+```VB
+    Private Sub uiTimer_Tick(sender As Object, e As EventArgs) Handles uiTimer.Tick
+        Try
+            uiTimer.Enabled = False
+            Debug.WriteLine("開始" + System.Threading.Thread.CurrentThread.ManagedThreadId.ToString())
+            System.Threading.Thread.Sleep(2000)
+            Application.DoEvents()
+            Debug.WriteLine("終了" + System.Threading.Thread.CurrentThread.ManagedThreadId.ToString())
+        Finally
+            uiTimer.Enabled = True
+        End Try
+    End Sub
+```
 * DoEventsを使わず、重い処理を非同期処理に切り出す
-* タイマーを廃止するまたは、インターバルを必要最低限になるように見直す(不具合発生頻度を減らすだけで根本解決にならない場合も多い)
+  とはいえ、非同期処理がタイマー発火より時間が掛かるため、非同期処理が溜まり続けていき動作重くなりそう  
+　許容できる程度の負荷で済むならあり  
 
+* タイマーを廃止するまたは、インターバルを必要最低限になるように見直す(不具合発生頻度を減らすだけで根本解決にならない場合も多い)
+* 重い処理を速くする(不具合発生頻度を減らすだけで根本解決にならない場合も多い)
+
+### 補足
+* フォームタイマー以外はWindowsメッセージキューを使用しません  
+  DoEventsによる再入はありませんが、複数スレッドで同時実行される可能性はあります
