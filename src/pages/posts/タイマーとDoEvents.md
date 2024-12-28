@@ -1,0 +1,135 @@
+---
+layout: ../../layouts/MarkdownPostLayout.astro
+title: 'タイマーとDoEvents'
+pubDate: 2024-12-28
+description: ''
+tags: ["C#","VB.NET"]
+---
+
+まず最初にDoEventsは使うなという意見は多数派であることは理解しており、私もそれには賛成の立場です。
+その前提でDoEventsを使っているシステムに関わる現場にいるため、問題点を記録しておきます。
+
+timerとDoEventsが組み合わさることで発生する予期しない動作を
+レガシーシステムで何度も目にしています。
+
+どういうことか、実際に例で動作確認してみます
+
+DoEventsを使っているのは大体VB6からマイグレしたVB.NETが体感多いため、ここではVB.NETで記載しています。
+
+[動作例]
+
+
+```vb
+Public Class Form1
+
+    Private WithEvents timer As Timer = New Timer()
+    Private loaded As Boolean = False
+    Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
+        timer.Enabled = True
+
+    End Sub
+
+    Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        If (loaded) Then Return
+        loaded = True
+        timer.Interval = 1000
+        timer.Enabled = False
+    End Sub
+
+    Private Sub timer_Tick(sender As Object, e As EventArgs) Handles timer.Tick
+        Debug.WriteLine("開始")
+        System.Threading.Thread.Sleep(2000) '何らかの重い処理
+        Application.DoEvents()
+        Debug.WriteLine("終了")
+    End Sub
+
+End Class
+```
+このコードを実行すると次のような出力になります
+```
+開始
+開始
+開始
+開始
+開始
+```
+2秒間掛かる重い処理＞タイマー発火間隔　のため、一生Windowsメッセージキューを処理し続けます。
+
+アプリが終了信号を受け取ると、溜まっていた終了処理が一気に処理されます
+```
+終了
+終了
+終了
+終了
+終了
+終了
+```
+再入を考慮せず、グローバル変数を扱っていたり外部インターフェースと連携している場合に
+このような状況になると非常に怖いです。
+
+### 根本原因
+色々あると思いますが、DoEventsやWindowsメッセージキューに対する理解が浅いことだと思います。
+規模が大きいシステムで乱用していると、もはや制御不可能です。
+
+
+DoEventsの実装は次の通り  
+コメントにある通り、全てのWindowsメッセージキューを処理します
+
+```c#
+        /// <include file='doc\Application.uex' path='docs/doc[@for="Application.DoEvents"]/*' />
+        /// <devdoc>
+        ///    <para>Processes
+        ///       all Windows messages currently in the message queue.</para>
+        /// </devdoc>
+        public static void DoEvents() {
+            ThreadContext.FromCurrent().RunMessageLoop(NativeMethods.MSOCM.msoloopDoEvents, null);
+        }
+```
+
+
+### 問題箇所の特定
+
+巨大なシステムだと、このような問題を見つけるのは
+中々大変なのでSpy++を使う。
+Spy++はVisualStudioInstallerでC++コア機能からインストールできる
+
+![1](https://github.com/user-attachments/assets/2381659a-a330-4f03-9db2-5452f22becc1)
+
+インストール後はVisualStudioのツールにリンクが作成される。
+ただし、このツールは32bitプロセス用。  
+一見きちんと動くがメッセージがキャプチャされないのでハマりやすいです。
+![2](https://github.com/user-attachments/assets/0d55246f-9802-4976-8800-d7befed583c4)
+
+64bitプロセス用を使いたい場合、外部ツールとして別途登録しておくことをお勧めします。
+![3](https://github.com/user-attachments/assets/cd612b41-6a86-4dce-9c44-931912484433)
+
+※エラー検索が２つあるのはVisualStudio2022のバグっぽい
+
+
+Spy++を起動したら次の作業を行います
+* 双眼鏡アイコンをクリックする
+* ファインダーツールの的を監視したいアプリにドラッグオンドロップする
+* メッセージをチェックする
+* OKを押す
+
+![4](https://github.com/user-attachments/assets/4c219a5a-752a-462d-b83e-18d1e0620bac)
+
+監視するメッセージの設定を行う  
+今回はWM_TIMERメッセージのみを拾う設定にする
+* メッセージタブからログオプションを選択する
+* すべてクリアを選択五、WM_TIMERを追加する
+* ウィンドウタブに移動し、同じプロセスウィンドウにチェックを入れる
+* OKを押す
+
+![5](https://github.com/user-attachments/assets/85a576c6-5e02-45c2-a5d1-60ee2974bf20)
+
+![6](https://github.com/user-attachments/assets/260b816c-b9cd-47e4-b9ac-a128d5d45855)
+
+これで目的のWindowsメッセージが確認できるようになった
+![7](https://github.com/user-attachments/assets/03e046ef-6cb4-4644-94d3-b1d70953f32b)
+
+### 対策方法
+
+* DoEventsを使わず、重い処理を非同期処理に切り出す
+* タイマーを廃止するまたは、インターバルを必要最低限になるように見直す(不具合発生頻度を減らすだけで根本解決にならない場合も多い)
+
