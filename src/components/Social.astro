@@ -1,0 +1,13 @@
+---
+const { url, imagepath } = Astro.props;
+---
+
+<a href={`${url}`}><img src={`${imagepath}`}/></a>
+
+<style>
+  a {
+    padding: 0.5rem 1rem;
+    background-color: transparent;
+    text-decoration: none;
+  }
+</style>
